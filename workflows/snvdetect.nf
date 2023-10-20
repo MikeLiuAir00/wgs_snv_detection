@@ -15,6 +15,14 @@ log.info logo + paramsSummaryLog(workflow) + citation
 
 WorkflowSnvdetect.initialise(params, log)
 
+def checkParamList = [
+    params.input, params.fasta, params.annotation
+]
+for (param in checkParamList) {
+    if (param) {
+        file(param, checkIfExists: true)
+    }
+}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -43,6 +51,8 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
+include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main.nf'
+include { BWA_MEM                     } from '../modules/nf-core/bwa/mem/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -55,25 +65,23 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def multiqc_report = []
 
 workflow SNVDETECT {
-
     ch_versions = Channel.empty()
-
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-    INPUT_CHECK (
-        file(params.input)
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+    input_ch = INPUT_CHECK(params.input)
 
     //
     // MODULE: Run Test
     //
 
-    INPUT_CHECK.out.view()
+    bwa index
+    BWA_INDEX(ref_ch)
 
+    // bwa mem
+    BWA_MEM(input_ch, BWA_INDEX.out.index)
+
+    //
+    // samtools view
     // CUSTOM_DUMPSOFTWAREVERSIONS (
     //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
     // )
