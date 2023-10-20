@@ -53,6 +53,9 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main.nf'
 include { BWA_MEM                     } from '../modules/nf-core/bwa/mem/main.nf'
+include { SAMTOOLS_SORT               } from '../modules/nf-core/samtools/sort/main.nf'
+include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main.nf'
+include { SAMTOOLS_IDXSTATS               } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -69,19 +72,37 @@ workflow SNVDETECT {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     input_ch = INPUT_CHECK(params.input)
-
+    Channel.fromPath(params.fasta)
+    | map{ file ->
+        ref_id = file.name.tokenize('.')[0]
+        meta = [id: ref_id]
+        [meta, file]
+    }
+    | set { ref_ch }
     //
     // MODULE: Run Test
     //
 
-    bwa index
+    // bwa index
+    // make bwa index files from reference genome
     BWA_INDEX(ref_ch)
 
     // bwa mem
-    BWA_MEM(input_ch, BWA_INDEX.out.index)
+    // align reads to reference
+    // output sorted bam file
+    BWA_MEM(input_ch.reads, BWA_INDEX.out.index, true)
 
-    //
-    // samtools view
+    // samtools index
+    // create index for alignment result
+    SAMTOOLS_INDEX(BWA_MEM.out.bam)
+
+    // samtools stat
+    SAMTOOLS_IDXSTATS(
+        BWA_MEM.out.bam.join(SAMTOOLS_INDEX.out.bai)
+        )
+
+    SAMTOOLS_IDXSTATS.out.idxstats.view()
+
     // CUSTOM_DUMPSOFTWAREVERSIONS (
     //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
     // )
