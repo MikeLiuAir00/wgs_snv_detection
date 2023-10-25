@@ -51,11 +51,12 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
+include { FASTP                       } from '../modules/nf-core/fastp/main'
 include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main.nf'
 include { BWA_MEM                     } from '../modules/nf-core/bwa/mem/main.nf'
 include { SAMTOOLS_SORT               } from '../modules/nf-core/samtools/sort/main.nf'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main.nf'
-include { SAMTOOLS_IDXSTATS               } from '../modules/nf-core/samtools/idxstats/main.nf'
+include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
