@@ -86,22 +86,30 @@ workflow SNVDETECT {
     // bwa index
     // make bwa index files from reference genome
     BWA_INDEX(ref_ch)
+    ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
+    BWA_INDEX.out.index.view()
 
     // bwa mem
     // align reads to reference
     // output sorted bam file
     BWA_MEM(input_ch.reads, BWA_INDEX.out.index, true)
+    ch_versions = ch_versions.mix(BWA_MEM.out.versions)
+    BWA_MEM.out.bam.view()
 
     // samtools index
     // create index for alignment result
     SAMTOOLS_INDEX(BWA_MEM.out.bam)
+    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+    SAMTOOLS_INDEX.out.bai.view()
 
     // samtools stat
     SAMTOOLS_IDXSTATS(
         BWA_MEM.out.bam.join(SAMTOOLS_INDEX.out.bai)
         )
-
+    ch_versions = ch_versions.mix(SAMTOOLS_IDXSTATS.out.versions)
     SAMTOOLS_IDXSTATS.out.idxstats.view()
+
+    ch_versions.out.view()
 
     // CUSTOM_DUMPSOFTWAREVERSIONS (
     //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
