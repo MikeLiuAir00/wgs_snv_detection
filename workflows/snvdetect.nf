@@ -52,8 +52,6 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { FASTP                       } from '../modules/nf-core/fastp/main'
-include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main.nf'
-include { BWA_MEM                     } from '../modules/nf-core/bwa/mem/main.nf'
 include { SAMTOOLS_SORT               } from '../modules/nf-core/samtools/sort/main.nf'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main.nf'
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
@@ -98,9 +96,9 @@ workflow SNVDETECT {
     // bwa mem
     // align reads to reference
     // output sorted bam file
-    BWA_MEM(FASTP.out.reads, BWA_INDEX.out.index, true)
-    ch_versions = ch_versions.mix(BWA_MEM.out.versions)
-    BWA_MEM.out.bam.view()
+    // BWA_MEM(FASTP.out.reads, BWA_INDEX.out.index, true)
+    // ch_versions = ch_versions.mix(BWA_MEM.out.versions)
+    // BWA_MEM.out.bam.view()
 
     // // samtools index
     // // create index for alignment result
