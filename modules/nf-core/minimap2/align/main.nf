@@ -10,7 +10,7 @@ process MINIMAP2_ALIGN {
 
     input:
     tuple val(meta), path(reads)
-    path reference
+    tuple val(meta2), path(reference)
     val bam_format
     val cigar_paf_format
     val cigar_bam
@@ -24,6 +24,7 @@ process MINIMAP2_ALIGN {
     task.ext.when == null || task.ext.when
 
     script:
+    println meta
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def bam_output = bam_format ? "-a | samtools sort | samtools view -@ ${task.cpus} -b -h -o ${prefix}.bam" : "-o ${prefix}.paf"
@@ -34,7 +35,7 @@ process MINIMAP2_ALIGN {
         $args \\
         -t $task.cpus \\
         "${reference ?: reads}" \\
-        "$reads" \\
+        $reads \\
         $cigar_paf \\
         $set_cigar_bam \\
         $bam_output

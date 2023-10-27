@@ -1,5 +1,6 @@
 process MINIMAP2_INDEX {
     label 'process_medium'
+    debug true
 
     // Note: the versions here need to match the versions used in minimap2/align
     conda 'modules/nf-core/minimap2/index/environment.yml'
@@ -19,6 +20,7 @@ process MINIMAP2_INDEX {
 
     script:
     def args = task.ext.args ?: ''
+    println fasta
     """
     minimap2 \\
         -t $task.cpus \\

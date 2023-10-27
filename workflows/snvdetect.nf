@@ -55,6 +55,8 @@ include { FASTP                       } from '../modules/nf-core/fastp/main'
 include { SAMTOOLS_SORT               } from '../modules/nf-core/samtools/sort/main.nf'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main.nf'
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
+include { MINIMAP2_INDEX              } from '../modules/nf-core/minimap2/index/main.nf'
+include { MINIMAP2_ALIGN              } from '../modules/nf-core/minimap2/align/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -78,44 +80,42 @@ workflow SNVDETECT {
         [meta, file]
     }
     | set { ref_ch }
+    ref_ch.view()
     //
     // MODULE: Run Test
     //
-
     // bwa index
     // make bwa index files from reference genome
-    BWA_INDEX(ref_ch)
-    ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
+    MINIMAP2_INDEX(ref_ch)
+    ch_versions = ch_versions.mix(MINIMAP2_INDEX.out.versions)
 
     // fastq quality filtering
     FASTP(input_ch.reads, [], false, false)
-    FASTP.out.reads.view()
     ch_versions = ch_versions.mix(FASTP.out.versions)
+    FASTP.out.reads.view()
 
+    // minimap2 align
+    // sorted bam output
+    MINIMAP2_ALIGN(FASTP.out.reads, MINIMAP2_INDEX.out.index.collect(), true, false, false)
+    MINIMAP2_ALIGN.out.bam.view()
+    ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
-    // bwa mem
-    // align reads to reference
-    // output sorted bam file
-    // BWA_MEM(FASTP.out.reads, BWA_INDEX.out.index, true)
-    // ch_versions = ch_versions.mix(BWA_MEM.out.versions)
-    // BWA_MEM.out.bam.view()
+    // samtools index
+    // create index for alignment result
+    SAMTOOLS_INDEX(MINIMAP2_ALIGN.out.bam)
+    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+    SAMTOOLS_INDEX.out.bai.view()
 
-    // // samtools index
-    // // create index for alignment result
-    // SAMTOOLS_INDEX(BWA_MEM.out.bam)
-    // ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-    // SAMTOOLS_INDEX.out.bai.view()
+    // samtools stat
+    SAMTOOLS_IDXSTATS(
+        MINIMAP2_ALIGN.out.bam.join(SAMTOOLS_INDEX.out.bai)
+        )
+    ch_versions = ch_versions.mix(SAMTOOLS_IDXSTATS.out.versions)
+    SAMTOOLS_IDXSTATS.out.idxstats.view()
 
-    // // samtools stat
-    // SAMTOOLS_IDXSTATS(
-    //     BWA_MEM.out.bam.join(SAMTOOLS_INDEX.out.bai)
-    //     )
-    // ch_versions = ch_versions.mix(SAMTOOLS_IDXSTATS.out.versions)
-    // SAMTOOLS_IDXSTATS.out.idxstats.view()
-
-    // CUSTOM_DUMPSOFTWAREVERSIONS (
-    //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    // )
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
 }
 
 /*
