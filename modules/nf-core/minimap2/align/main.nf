@@ -24,7 +24,6 @@ process MINIMAP2_ALIGN {
     task.ext.when == null || task.ext.when
 
     script:
-    println meta
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def bam_output = bam_format ? "-a | samtools sort | samtools view -@ ${task.cpus} -b -h -o ${prefix}.bam" : "-o ${prefix}.paf"

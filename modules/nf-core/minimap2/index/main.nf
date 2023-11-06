@@ -20,7 +20,6 @@ process MINIMAP2_INDEX {
 
     script:
     def args = task.ext.args ?: ''
-    println fasta
     """
     minimap2 \\
         -t $task.cpus \\

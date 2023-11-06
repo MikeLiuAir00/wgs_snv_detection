@@ -54,6 +54,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { FASTP                       } from '../modules/nf-core/fastp/main'
 include { SAMTOOLS_SORT               } from '../modules/nf-core/samtools/sort/main.nf'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main.nf'
+include { SAMTOOLS_STATS              } from '../modules/nf-core/samtools/stats/main.nf'
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { MINIMAP2_INDEX              } from '../modules/nf-core/minimap2/index/main.nf'
 include { MINIMAP2_ALIGN              } from '../modules/nf-core/minimap2/align/main.nf'
@@ -92,26 +93,33 @@ workflow SNVDETECT {
     // fastq quality filtering
     FASTP(input_ch.reads, [], false, false)
     ch_versions = ch_versions.mix(FASTP.out.versions)
-    FASTP.out.reads.view()
 
     // minimap2 align
     // sorted bam output
     MINIMAP2_ALIGN(FASTP.out.reads, MINIMAP2_INDEX.out.index.collect(), true, false, false)
-    MINIMAP2_ALIGN.out.bam.view()
     ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
     // samtools index
     // create index for alignment result
     SAMTOOLS_INDEX(MINIMAP2_ALIGN.out.bam)
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-    SAMTOOLS_INDEX.out.bai.view()
 
     // samtools stat
     SAMTOOLS_IDXSTATS(
         MINIMAP2_ALIGN.out.bam.join(SAMTOOLS_INDEX.out.bai)
         )
     ch_versions = ch_versions.mix(SAMTOOLS_IDXSTATS.out.versions)
-    SAMTOOLS_IDXSTATS.out.idxstats.view()
+
+    SAMTOOLS_STATS(
+        MINIMAP2_ALIGN.out.bam.join(SAMTOOLS_INDEX.out.bai),
+        ref_ch.collect()
+        )
+    ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
+
+
+    // gatk steps
+
+
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
