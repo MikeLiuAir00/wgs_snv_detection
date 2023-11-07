@@ -82,9 +82,9 @@ workflow SNVDETECT {
     }
     | set { ref_ch }
     ref_ch.view()
-    //
-    // MODULE: Run Test
-    //
+
+    // Alignment START
+
     // bwa index
     // make bwa index files from reference genome
     MINIMAP2_INDEX(ref_ch)
@@ -116,9 +116,31 @@ workflow SNVDETECT {
         )
     ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
 
+    // Alignment Finished
 
-    // gatk steps
+    // GATK best practice workflow
 
+    // MarkDupliacte
+
+    // Calibrate Base Quality Score
+    // init-round --> HaplotypeCall --> filter --> get snpdb.vcf from filtered snv --> calibrate
+    // initial round (obtain snv.db.vcf)
+    // HplotypeCaller on uncalicrated data
+
+    // Filter low quality snv
+
+    // Train Calibrate table with filtered snv db
+
+    // apply trained calibration model
+
+
+    // HaplotypeCaller with calibrated bam
+
+    // Filter low quality snv
+
+    // combine vcf files
+
+    // Call Genotype
 
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
