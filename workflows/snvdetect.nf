@@ -70,9 +70,9 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def multiqc_report = []
 
 workflow SNVDETECT {
+
+    // Read in samplesheet, validate and stage input files
     ch_versions = Channel.empty()
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     input_ch = INPUT_CHECK(params.input)
     Channel.fromPath(params.fasta)
     | map{ file ->
@@ -85,12 +85,12 @@ workflow SNVDETECT {
 
     // Alignment START
 
-    // bwa index
-    // make bwa index files from reference genome
+    // Minimap2 index
+    // make minimap2 index files from reference genome
     MINIMAP2_INDEX(ref_ch)
     ch_versions = ch_versions.mix(MINIMAP2_INDEX.out.versions)
 
-    // fastq quality filtering
+    // fastp quality filtering
     FASTP(input_ch.reads, [], false, false)
     ch_versions = ch_versions.mix(FASTP.out.versions)
 
@@ -119,6 +119,8 @@ workflow SNVDETECT {
     // Alignment Finished
 
     // GATK best practice workflow
+
+    // Add read group info
 
     // MarkDupliacte
 
