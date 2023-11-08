@@ -1,0 +1,11 @@
+sample,fastq_1,fastq_2
+PS1_1,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_1_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_1_2.fq.gz
+PS1_2,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_2_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_2_2.fq.gz
+PS1_3,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_3_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_3_2.fq.gz
+PS1_4,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_4_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_4_2.fq.gz
+PS1_5,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_5_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_5_2.fq.gz
+PS1_6,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_6_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_6_2.fq.gz
+PS1_7,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_7_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_7_2.fq.gz
+PS1_8,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_8_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_8_2.fq.gz
+PS1_9,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_9_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_9_2.fq.gz
+PS1_10,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_10_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_10_2.fq.gz

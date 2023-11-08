@@ -131,7 +131,7 @@ workflow SNVDETECT {
 
     // Train Calibrate table with filtered snv db
 
-    // apply trained calibration model
+    // Apply trained calibration model
 
 
     // HaplotypeCaller with calibrated bam
