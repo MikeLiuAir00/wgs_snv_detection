@@ -1,5 +1,6 @@
 sample,fastq_1,fastq_2
 PS1_1,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_1_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS1_1_2.fq.gz
+PS2_2,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS2_2_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-01/00raw/PS2_2_2.fq.gz
 PS9_1,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-02-ext/PS9_1_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-02-ext/PS9_1_2.fq.gz
 PS22_1,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-02-ext/PS22_1_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-02-ext/PS22_1_2.fq.gz
 PS34_1,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-02-ext/PS34_1_1.fq.gz,/public/Bio/Bio_data/Armeniaca_Resequencing/JZP202302GM011-02-ext/PS34_1_2.fq.gz

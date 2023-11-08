@@ -119,6 +119,25 @@ workflow SNVDETECT {
     // Alignment Finished
 
     // GATK best practice workflow
+    // join read group info with data channel by meta[sample_id]
+    Channel.fromPath(params.readgroups)
+    | splitCsv(header:true)
+    | map {row ->
+            rg = [row.RGSM, row.RGID, row.RGLB, row.RGPU, row.RGPL]
+        }
+    | set { readgroup_ch }
+    readgroup_ch.last().view()
+    MINIMAP2_ALIGN.out.bam.view()
+
+    MINIMAP2_ALIGN.out.bam
+    | map { meta, bam -> tuple(meta.id, meta.single_end, bam) }
+    | join ( readgroup_ch )
+    | map { id, single_end, bam, rgid, rglb, rgpu, rgpl ->
+            meta = [id:id, single_end:single_end, rgid:rgid, rglb:rglb, rgpu:rgpu, rgpl:rgpl]
+            [meta, bam]
+        }
+    | view
+
 
     // Add read group info
 
