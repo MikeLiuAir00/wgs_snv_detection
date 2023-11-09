@@ -10,13 +10,19 @@ process HAPLOTYPECALLER {
     input:
     tuple val(meta),    path(bam)
     tuple val(meta1),   path(bai)
-    tuple val(meta2),    path(ref)
+    tuple val(meta2),   path(ref)
+    tuple val(meta3),   path(fai)
+    path(dbsnp)
+    path(dbsnp_tbi)
+    path(intervals)
     val(ifgvcf)
 
+
     output:
-    tuple val(meta), path("*.vcf.gz"), optional: true, emit: vcf
-    tuple val(meta), path("*.g.vcf.gz"), optional: true, emit: gvcf
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*.vcf.gz")   , optional: true, emit: vcf
+    tuple val(meta), path("*.g.vcf.gz") , optional: true, emit: gvcf
+    tuple val(meta), path("*.tbi")      , optional:true, emit: tbi
+    path "versions.yml"                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,13 +32,18 @@ process HAPLOTYPECALLER {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def suffix = ifgvcf ? '.g.vcf.gz': '.vcf.gz'
     def gvcf = ifgvcf ? '-ERC GVCF': ''
+    def dbsnp_command = dbsnp ? "--dbsnp $dbsnp" : ""
+    def interval_command = intervals ? "--intervals $intervals" : ""
     """
     gatk --java-options "-Xms4G -Xmx4G -XX:ParallelGCThreads=2" \
         HaplotypeCaller  \
             -R $ref \
             -I $bam \
             -O ${prefix}${suffix} \
+            --tmp-dir . \
             $gvcf \
+            $dbsnp_command \
+            $interval_command \
             $args
 
     cat <<-END_VERSIONS > versions.yml
@@ -45,7 +56,7 @@ process HAPLOTYPECALLER {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.vcf
+    touch ${prefix}${suffix}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
