@@ -153,14 +153,16 @@ workflow SNVDETECT {
     // HplotypeCaller on uncalicrated data
     // HAPLOTYPECALLER(MARKDUPLICATE.out.bam)
     SAMTOOLS_FAIDX(ref_ch)
+    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
+
 
     HAPLOTYPECALLER(MARKDUPLICATE.out.bam,
         MARKDUPLICATE.out.bai,
         ref_ch.collect(),
         SAMTOOLS_FAIDX.out.fai.collect(),
-        None,
-        None,
-        None,
+        [],
+        [],
+        [],
         true
         )
     // Filter low quality snv

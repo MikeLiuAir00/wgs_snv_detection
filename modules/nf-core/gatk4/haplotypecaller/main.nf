@@ -11,7 +11,6 @@ process GATK4_HAPLOTYPECALLER {
     tuple val(meta), path(input), path(input_index), path(intervals), path(dragstr_model)
     path  fasta
     path  fai
-    path  dict
     path  dbsnp
     path  dbsnp_tbi
 

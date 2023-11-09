@@ -8,7 +8,7 @@ process HAPLOTYPECALLER {
         'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
 
     input:
-    tuple val(meta),    path(bam)
+    tuple val(meta) ,   path(bam)
     tuple val(meta1),   path(bai)
     tuple val(meta2),   path(ref)
     tuple val(meta3),   path(fai)
