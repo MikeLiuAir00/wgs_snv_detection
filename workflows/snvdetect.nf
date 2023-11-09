@@ -54,6 +54,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { FASTP                       } from '../modules/nf-core/fastp/main'
 include { SAMTOOLS_SORT               } from '../modules/nf-core/samtools/sort/main.nf'
 include { SAMTOOLS_INDEX              } from '../modules/nf-core/samtools/index/main.nf'
+include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main.nf'
 include { SAMTOOLS_STATS              } from '../modules/nf-core/samtools/stats/main.nf'
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { MINIMAP2_INDEX              } from '../modules/nf-core/minimap2/index/main.nf'
@@ -151,7 +152,7 @@ workflow SNVDETECT {
     // initial round (obtain snv.db.vcf)
     // HplotypeCaller on uncalicrated data
     // HAPLOTYPECALLER(MARKDUPLICATE.out.bam)
-
+    SAMTOOLS_FAIDX()
     HAPLOTYPECALLER(MARKDUPLICATE.out.bam,
         MARKDUPLICATE.out.bai,
         ref_ch.collect(),
