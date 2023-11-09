@@ -1,18 +1,20 @@
 process MARKDUPLICATE {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_medium'
 
-    conda "bioconda::picard=3.0.0"
+    conda "bioconda::gatk4-spark=4.4.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/picard:3.0.0--hdfd78af_1':
-        'biocontainers/picard:3.0.0--hdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/gatk4-spark:4.4.0.0--hdfd78af_0':
+        'biocontainers/gatk4-spark:4.4.0.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam)
 
     output:
     tuple val(meta), path("*.bam"), emit: bam
-    tuple val(meta), path(".txt") , emit: metrics
+    tuple val(meta), path("*.txt"), optional: true, emit: metrics
+    tuple val(meta), path("*.bai"), optional: true, emit: bai
+    tuple val(meta), path("*.sbi"), optional: true, emit: sbi
     path "versions.yml"           , emit: versions
 
     when:
@@ -22,15 +24,15 @@ process MARKDUPLICATE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    picard MarkDuplicates \
+    gatk MarkDuplicatesSpark \
         $args \
-        I=$bam \
-        O=${prefix}.bam \
-        M=marked_dup_metrics.txt
+        -I $bam \
+        -O ${prefix}.bam \
+        -M ${meta.id}_marked_dup_metrics.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-    gatk: \$(gatk --version 2>1&)
+        gatk4: \$(echo \$(gatk --version 2>&1) | sed 's/^.*(GATK) v//; s/ .*\$//')
     END_VERSIONS
     """
 
@@ -42,7 +44,7 @@ process MARKDUPLICATE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-    gatk: \$(gatk --version 2>1&)
+        gatk4: \$(echo \$(gatk --version 2>&1) | sed 's/^.*(GATK) v//; s/ .*\$//')
     END_VERSIONS
     """
 }

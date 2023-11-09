@@ -31,7 +31,7 @@ process BQSR {
         -O ${prefix}.recal_data.table
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-    gatk: \$(gatk --version 2>1&)
+        gatk: \$(gatk --version 2>1&)
     END_VERSIONS
     """
 
@@ -43,7 +43,7 @@ process BQSR {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-    gatk: \$(gatk --version 2>1&)
+        gatk: \$(gatk --version 2>1&)
     END_VERSIONS
     """
 }

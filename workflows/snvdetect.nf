@@ -58,6 +58,9 @@ include { SAMTOOLS_STATS              } from '../modules/nf-core/samtools/stats/
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { MINIMAP2_INDEX              } from '../modules/nf-core/minimap2/index/main.nf'
 include { MINIMAP2_ALIGN              } from '../modules/nf-core/minimap2/align/main.nf'
+include { ADDREADGROUPS                } from '../modules/local/addreadgroups.nf'
+include { MARKDUPLICATE               } from '../modules/local/markduplicate.nf'
+include { HAPLOTYPECALLER             } from '../modules/local/haplotypecaller.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -126,8 +129,6 @@ workflow SNVDETECT {
             rg = [row.RGSM, row.RGID, row.RGLB, row.RGPU, row.RGPL]
         }
     | set { readgroup_ch }
-    readgroup_ch.last().view()
-    MINIMAP2_ALIGN.out.bam.view()
 
     MINIMAP2_ALIGN.out.bam
     | map { meta, bam -> tuple(meta.id, meta.single_end, bam) }
@@ -136,18 +137,26 @@ workflow SNVDETECT {
             meta = [id:id, single_end:single_end, rgid:rgid, rglb:rglb, rgpu:rgpu, rgpl:rgpl]
             [meta, bam]
         }
-    | view
+    | set {ch_downstream }
 
 
     // Add read group info
-
+    ADDREADGROUPS(ch_downstream)
+    ch_versions = ch_versions.mix(ADDREADGROUPS.out.versions)
     // MarkDupliacte
-
+    MARKDUPLICATE(ADDREADGROUPS.out.bam)
+    ch_versions = ch_versions.mix(MARKDUPLICATE.out.versions)
     // Calibrate Base Quality Score
     // init-round --> HaplotypeCall --> filter --> get snpdb.vcf from filtered snv --> calibrate
     // initial round (obtain snv.db.vcf)
     // HplotypeCaller on uncalicrated data
+    // HAPLOTYPECALLER(MARKDUPLICATE.out.bam)
 
+    HAPLOTYPECALLER(MARKDUPLICATE.out.bam,
+        MARKDUPLICATE.out.bai,
+        ref_ch.collect(),
+        true
+        )
     // Filter low quality snv
 
     // Train Calibrate table with filtered snv db

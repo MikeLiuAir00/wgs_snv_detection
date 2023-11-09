@@ -21,15 +21,21 @@ process ADDREADGROUPS {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    picard.jar AddOrReplaceReadGroups \
+    picard AddOrReplaceReadGroups \
         I=$bam \
         O=${prefix}.bam \
+        RGSM=$meta.id \
+        RGID=$meta.rgid \
+        RGLB=$meta.rglb \
+        RGPU=$meta.rgpu \
+        RGPL=$meta.rgpl
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        : \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' ))
+        picard: \$(picard AddOrReplaceReadGroups --version 2>&1 | grep -o 'Version:.*' | cut -f2- -d:)
     END_VERSIONS
     """
+    // picard: \$(picard AddOrReplaceReadGroups --version 2>1&)
 
     stub:
     def args = task.ext.args ?: ''
@@ -39,7 +45,8 @@ process ADDREADGROUPS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        picard: \$(java -jar picard.jar -version 2>1&)
+        picard: \$(picard AddOrReplaceReadGroups --version 2>&1 | grep -o 'Version:.*' | cut -f2- -d:)
     END_VERSIONS
     """
+    // not output in stdout picard: \$(picard AddOrReplaceReadGroups --version 2>1&)
 }
