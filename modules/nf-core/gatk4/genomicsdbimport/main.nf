@@ -8,7 +8,11 @@ process GATK4_GENOMICSDBIMPORT {
         'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(vcf), path(tbi), path(interval_file), val(interval_value), path(wspace)
+    tuple val(meta), path(vcf)
+    tuple val(meta), path(tbi)
+    val   interval_value
+    path  interval_file
+    path  wspace
     val   run_intlist
     val   run_updatewspace
     val   input_map

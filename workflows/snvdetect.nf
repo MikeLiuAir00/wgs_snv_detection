@@ -65,7 +65,8 @@ include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/create
 include { ADDREADGROUPS                } from '../modules/local/addreadgroups.nf'
 include { MARKDUPLICATE               } from '../modules/local/markduplicate.nf'
 include { HAPLOTYPECALLER             } from '../modules/local/haplotypecaller.nf'
-include { GenomicsDBImport            } from '../modules/nf-core/gatk4/genomicsdbimport/main.nf'
+include { GATK4_GENOMICSDBIMPORT      } from '../modules/nf-core/gatk4/genomicsdbimport/main.nf'
+include { GATK4_GENOTYPEGVCFS         } from '../modules/nf-core/gatk4/genotypegvcfs/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 
@@ -181,6 +182,10 @@ workflow SNVDETECT {
         )
 
     // GenomicsDBImport
+    // wrangle input
+
+    // call snp indel on combined db
+
     // Filter low quality snv
 
     // Train Calibrate table with filtered snv db
@@ -196,7 +201,6 @@ workflow SNVDETECT {
 
     // Call Genotype
 
-    ch_versions.view()
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
