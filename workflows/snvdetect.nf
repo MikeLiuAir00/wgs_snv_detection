@@ -176,7 +176,8 @@ workflow SNVDETECT {
         [],
         true
         )
-    ch_versions = ch_versions.mix(HAPLOTYPECALLER.out.versions)
+
+    // GenomicsDBImport
     // Filter low quality snv
 
     // Train Calibrate table with filtered snv db
@@ -192,7 +193,7 @@ workflow SNVDETECT {
 
     // Call Genotype
 
-
+    ch_versions.view()
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
