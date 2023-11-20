@@ -59,10 +59,17 @@ include { SAMTOOLS_STATS              } from '../modules/nf-core/samtools/stats/
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { MINIMAP2_INDEX              } from '../modules/nf-core/minimap2/index/main.nf'
 include { MINIMAP2_ALIGN              } from '../modules/nf-core/minimap2/align/main.nf'
+
+// GATK modules
+include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
 include { ADDREADGROUPS                } from '../modules/local/addreadgroups.nf'
 include { MARKDUPLICATE               } from '../modules/local/markduplicate.nf'
 include { HAPLOTYPECALLER             } from '../modules/local/haplotypecaller.nf'
+include { GenomicsDBImport            } from '../modules/nf-core/gatk4/genomicsdbimport/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+
+
+include { DROPMINIMAPFIELD            } from '../modules/local/dropminimapfield.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -147,6 +154,7 @@ workflow SNVDETECT {
     // MarkDupliacte
     MARKDUPLICATE(ADDREADGROUPS.out.bam)
     ch_versions = ch_versions.mix(MARKDUPLICATE.out.versions)
+
     // Calibrate Base Quality Score
     // init-round --> HaplotypeCall --> filter --> get snpdb.vcf from filtered snv --> calibrate
     // initial round (obtain snv.db.vcf)
@@ -155,16 +163,24 @@ workflow SNVDETECT {
     SAMTOOLS_FAIDX(ref_ch)
     ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
 
+    // create reference dictionary
+    GATK4_CREATESEQUENCEDICTIONARY(ref_ch)
+    ch_versions = ch_versions.mix(GATK4_CREATESEQUENCEDICTIONARY.out.versions)
 
-    HAPLOTYPECALLER(MARKDUPLICATE.out.bam,
+    // DROPMINIMAPFIELD(MARKDUPLICATE.out.bam)
+    HAPLOTYPECALLER(
+        MARKDUPLICATE.out.bam,
         MARKDUPLICATE.out.bai,
         ref_ch.collect(),
         SAMTOOLS_FAIDX.out.fai.collect(),
+        GATK4_CREATESEQUENCEDICTIONARY.out.dict.collect(),
         [],
         [],
         [],
         true
         )
+
+    // GenomicsDBImport
     // Filter low quality snv
 
     // Train Calibrate table with filtered snv db
@@ -180,7 +196,7 @@ workflow SNVDETECT {
 
     // Call Genotype
 
-
+    ch_versions.view()
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )

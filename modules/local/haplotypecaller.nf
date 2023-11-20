@@ -1,17 +1,19 @@
 process HAPLOTYPECALLER {
     tag "$meta.id"
     label 'process_low'
+    label 'process_long'
 
-    conda "bioconda::gatk4=4.4.0.0"
+    conda "bioconda::gatk4=4.2.6.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gatk4:4.4.0.0--py36hdfd78af_0':
-        'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/gatk4:4.2.6.1--py36hdfd78af_0':
+        'quay.io/biocontainers/gatk4:4.2.6.1--py36hdfd78af_1' }"
 
     input:
     tuple val(meta) ,   path(bam)
     tuple val(meta1),   path(bai)
     tuple val(meta2),   path(ref)
     tuple val(meta3),   path(fai)
+    tuple val(meta4),   path(dict)
     path(dbsnp)
     path(dbsnp_tbi)
     path(intervals)
@@ -20,7 +22,7 @@ process HAPLOTYPECALLER {
 
     output:
     tuple val(meta), path("*.vcf.gz")   , optional: true, emit: vcf
-    tuple val(meta), path("*.g.vcf.gz") , optional: true, emit: gvcf
+    //tuple val(meta), path("*.g.vcf.gz") , optional: true, emit: gvcf
     tuple val(meta), path("*.tbi")      , optional:true, emit: tbi
     path "versions.yml"                 , emit: versions
 
