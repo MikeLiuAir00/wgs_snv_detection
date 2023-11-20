@@ -59,10 +59,13 @@ include { SAMTOOLS_STATS              } from '../modules/nf-core/samtools/stats/
 include { SAMTOOLS_IDXSTATS           } from '../modules/nf-core/samtools/idxstats/main.nf'
 include { MINIMAP2_INDEX              } from '../modules/nf-core/minimap2/index/main.nf'
 include { MINIMAP2_ALIGN              } from '../modules/nf-core/minimap2/align/main.nf'
+
+// GATK modules
 include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
 include { ADDREADGROUPS                } from '../modules/local/addreadgroups.nf'
 include { MARKDUPLICATE               } from '../modules/local/markduplicate.nf'
 include { HAPLOTYPECALLER             } from '../modules/local/haplotypecaller.nf'
+include { GenomicsDBImport            } from '../modules/nf-core/gatk4/genomicsdbimport/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 
