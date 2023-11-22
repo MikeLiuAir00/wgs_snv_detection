@@ -69,7 +69,7 @@ include { GATK4_GENOMICSDBIMPORT      } from '../modules/nf-core/gatk4/genomicsd
 include { GATK4_GENOTYPEGVCFS         } from '../modules/nf-core/gatk4/genotypegvcfs/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
-
+include { MKDBIMPORTLIST              } from '../modules/local/mkdbimportlist.nf'
 include { DROPMINIMAPFIELD            } from '../modules/local/dropminimapfield.nf'
 
 /*
@@ -183,11 +183,48 @@ workflow SNVDETECT {
 
     // GenomicsDBImport
     // wrangle input
+    HAPLOTYPECALLER.out.vcf
+    | map {meta, vcf ->
+            meta = [id:meta.id]
+            [meta, vcf]
+        }
+    | collectFile(sort: true) { meta, vcf ->
+        ["vcf.sample_map", meta.id + "\t" + vcf + '\n' ]
+    }
+    | set { vcf_in }
+
+    vcf_in
+    | map { f_vcf ->
+        meta = [id: "sample list"]
+        [meta, f_vcf]
+    }
+    | set { vcf_in }
+
+    Channel.fromList((1..8).collect {"chr${it}"})
+    | set {interval_ch}
+    // create db on all chrs
+    GATK4_GENOMICSDBIMPORT(vcf_in.collect(), interval_ch, [], [], false, false, true)
+    GATK4_GENOMICSDBIMPORT.out.genomicsdb.view()
 
     // call snp indel on combined db
+    GATK4_GENOMICSDBIMPORT.out.genomicsdb
+    | map { meta, db ->
+        [meta, db, [], [], []]
+    }
+    | set {genomicsdb_ch}
+    GATK4_GENOTYPEGVCFS(
+        genomicsdb_ch,
+        ref_ch.collect(),
+        SAMTOOLS_FAIDX.out.fai.collect(),
+        GATK4_CREATESEQUENCEDICTIONARY.out.dict.collect(),
+        [],
+        []
+    )
+    GATK4_GENOTYPEGVCFS.out.vcf.view()
 
     // Filter low quality snv
 
+    // combine all chrs
     // Train Calibrate table with filtered snv db
 
     // Apply trained calibration model

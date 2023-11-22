@@ -5,11 +5,11 @@ process GATK4_GENOMICSDBIMPORT {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/gatk4:4.4.0.0--py36hdfd78af_0':
-        'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
+        'quay.io/biocontainers/gatk4:4.2.6.1--py36hdfd78af_1' }"
+//        'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
 
     input:
     tuple val(meta), path(vcf)
-    tuple val(meta), path(tbi)
     val   interval_value
     path  interval_file
     path  wspace
@@ -28,10 +28,10 @@ process GATK4_GENOMICSDBIMPORT {
 
     script:
     def args = task.ext.args   ?: ''
-    prefix   = task.ext.prefix ?: "${meta.id}"
+    prefix   = task.ext.prefix ?: "${interval_value}_db"
 
     // settings for running default create gendb mode
-    input_command = input_map ? "--sample-name-map ${vcf[0]}" : vcf.collect(){"--variant $it"}.join(' ')
+    input_command = input_map ? "--sample-name-map ${vcf}" : vcf.collect(){"--variant $it"}.join(' ')
 
     genomicsdb_command = "--genomicsdb-workspace-path ${prefix}"
     interval_command = interval_file ? "--intervals ${interval_file}" : "--intervals ${interval_value}"
