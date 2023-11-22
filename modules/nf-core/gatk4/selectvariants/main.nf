@@ -8,7 +8,9 @@ process GATK4_SELECTVARIANTS {
         'biocontainers/gatk4:4.4.0.0--py36hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(vcf), path(vcf_idx), path (intervals)
+    tuple val(meta), path(vcf)
+    tuple val(meta2), path(vcf_idx)
+    path (intervals)
 
     output:
     tuple val(meta), path("*.selectvariants.vcf.gz")       , emit: vcf

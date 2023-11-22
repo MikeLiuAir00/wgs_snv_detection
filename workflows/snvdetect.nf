@@ -222,6 +222,15 @@ workflow SNVDETECT {
     )
     GATK4_GENOTYPEGVCFS.out.vcf.view()
 
+    GATK4_GENOTYPEGVCFS.out.vcf
+    | map{ meta, vcf ->
+        chr = vcf.name =~ /(chr\d)_db/
+        meta = [id: chr[0][1]]
+        [meta, vcf]
+    }
+    | set { genotype_ch }
+
+    // enter subworkflow
     // Filter low quality snv
 
     // combine all chrs
