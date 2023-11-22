@@ -20,6 +20,16 @@
                         "git_sha": "bd8092b67b5103bdd52e300f75889442275c3117",
                         "installed_by": ["modules"]
                     },
+                    "gatk4/applybqsr": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/baserecalibrator": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
                     "gatk4/combinegvcfs": {
                         "branch": "master",
                         "git_sha": "8fc1d24c710ebe1d5de0f2447ec9439fd3d9d66a",
@@ -43,6 +53,26 @@
                     "gatk4/haplotypecaller": {
                         "branch": "master",
                         "git_sha": "8fc1d24c710ebe1d5de0f2447ec9439fd3d9d66a",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/mergevcfs": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/selectvariants": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/variantfiltration": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/variantrecalibrator": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "minimap2/align": {
