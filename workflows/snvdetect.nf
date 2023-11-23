@@ -72,6 +72,11 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 include { MKDBIMPORTLIST              } from '../modules/local/mkdbimportlist.nf'
 include { DROPMINIMAPFIELD            } from '../modules/local/dropminimapfield.nf'
 
+
+// subworkflow
+include { FILTERSNPINDEL as filter_snp_indel     } from '../subworkflows/local/filtersnpindel.nf'
+include { MERGECHR       as mergechr_bootstrap             } from '../subworkflows/local/mergechr.nf'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -204,7 +209,6 @@ workflow SNVDETECT {
     | set {interval_ch}
     // create db on all chrs
     GATK4_GENOMICSDBIMPORT(vcf_in.collect(), interval_ch, [], [], false, false, true)
-    GATK4_GENOMICSDBIMPORT.out.genomicsdb.view()
 
     // call snp indel on combined db
     GATK4_GENOMICSDBIMPORT.out.genomicsdb
@@ -220,20 +224,53 @@ workflow SNVDETECT {
         [],
         []
     )
-    GATK4_GENOTYPEGVCFS.out.vcf.view()
 
     GATK4_GENOTYPEGVCFS.out.vcf
-    | map{ meta, vcf ->
+    | join (GATK4_GENOTYPEGVCFS.out.tbi)
+    | map{ meta, vcf, tbi ->
         chr = vcf.name =~ /(chr\d)_db/
         meta = [id: chr[0][1]]
-        [meta, vcf]
+        [meta, vcf, tbi]
     }
     | set { genotype_ch }
 
     // enter subworkflow
     // Filter low quality snv
+    filter_snp_indel(genotype_ch, ref_ch, SAMTOOLS_FAIDX.out.fai, GATK4_CREATESEQUENCEDICTIONARY.out.dict)
+
+    // wrangle data
+    filter_snp_indel.out.snp_vcf
+    | map { meta, vcf ->
+        meta = [meta.type]
+        [meta, vcf]
+    }
+    | groupTuple
+    | map {meta, vcf ->
+        meta = [id: meta[0]]
+        [meta, vcf]
+    }
+    | set { ch_snp }
+
+    filter_snp_indel.out.indel_vcf
+    | map { meta, vcf ->
+        meta = [meta.type]
+        [meta, vcf]
+    }
+    | groupTuple
+    | map {meta, vcf ->
+        meta = [id: meta[0]]
+        [meta, vcf]
+    }
+    | set { ch_indel }
 
     // combine all chrs
+    mergechr_bootstrap(
+        ch_snp,
+        ch_indel,
+        GATK4_CREATESEQUENCEDICTIONARY.out.dict
+    )
+    | set { merged }
+    merged.snp_vcf.view()
     // Train Calibrate table with filtered snv db
 
     // Apply trained calibration model
