@@ -33,8 +33,7 @@ workflow FILTERSNPINDEL {
     // FILTER_SNP(ch_snp, ch_fasta, ch_fai, ch_dict)
     // FILTER_INDEL(ch_indel, ch_fasta, ch_fai, ch_dict)
 
-    // join SNP and INDEL
-    // DROPFILTERED()
+    // DROPFILTERED
     ch_versions = Channel.empty()
 
 
