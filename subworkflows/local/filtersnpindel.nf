@@ -1,14 +1,11 @@
-// TODO nf-core: If in doubt look at other nf-core/subworkflows to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/subworkflows
-//               You can also ask for help via your pull request or on the #subworkflows channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
-// TODO nf-core: A subworkflow SHOULD import at least two modules
-
 include { GATK4_SELECTVARIANTS as SELECT_SNP} from '../../modules/nf-core/gatk4/selectvariants/main.nf'
 include { GATK4_SELECTVARIANTS as SELECT_INDEL } from '../../modules/nf-core/gatk4/selectvariants/main.nf'
+include { GATK4_SELECTVARIANTS as DROPFILTERED } '../../modules/nf-core/gatk4/selectvariants/main.nf'
 include { GATK4_VARIANTFILTRATION as FILTER_SNP } from '../../modules/nf-core/gatk4/variantfiltration/main.nf'
 include { GATK4_VARIANTFILTRATION as FILTER_INDEL } from '../../modules/nf-core/gatk4/variantfiltration/main.nf'
 
+// Filter low qualit SNP and INDEL from raw calling result, and generate
+// summary stat table for inspection and visualization
 workflow FILTERSNPINDEL {
 
     take:
@@ -32,10 +29,12 @@ workflow FILTERSNPINDEL {
     | join (SELECT_INDEL.out.tbi)
     | set { ch_indel }
 
-    FILTER_SNP(ch_snp, ch_fasta, ch_fai, ch_dict)
-    FILTER_INDEL(ch_indel, ch_fasta, ch_fai, ch_dict)
+    // apply hard filtering
+    // FILTER_SNP(ch_snp, ch_fasta, ch_fai, ch_dict)
+    // FILTER_INDEL(ch_indel, ch_fasta, ch_fai, ch_dict)
 
-    // Apply Hard filter
+    // join SNP and INDEL
+    // DROPFILTERED()
     ch_versions = Channel.empty()
 
 
