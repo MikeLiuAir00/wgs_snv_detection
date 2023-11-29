@@ -67,6 +67,8 @@ include { MARKDUPLICATE               } from '../modules/local/markduplicate.nf'
 include { HAPLOTYPECALLER             } from '../modules/local/haplotypecaller.nf'
 include { GATK4_GENOMICSDBIMPORT      } from '../modules/nf-core/gatk4/genomicsdbimport/main.nf'
 include { GATK4_GENOTYPEGVCFS         } from '../modules/nf-core/gatk4/genotypegvcfs/main.nf'
+include { GATK4_BASERECALIBRATOR as BQSR    } from '../modules/nf-core/gatk4/baserecalibrator/main.nf'
+include { GATK4_APPLYBQSR as APPLYBQSR           } from '../modules/nf-core/gatk4/applybqsr/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 include { MKDBIMPORTLIST              } from '../modules/local/mkdbimportlist.nf'
@@ -76,6 +78,8 @@ include { DROPMINIMAPFIELD            } from '../modules/local/dropminimapfield.
 // subworkflow
 include { FILTERSNPINDEL as filter_snp_indel     } from '../subworkflows/local/filtersnpindel.nf'
 include { MERGECHR       as mergechr_bootstrap             } from '../subworkflows/local/mergechr.nf'
+include { BQSR_RUN       as bqsr_run             } from '../subworkflows/local/bqsr_run.nf'
+include { VARIANT_CALL   as post_calibration_call          } from '../subworkflows/local/variant_call.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -270,11 +274,46 @@ workflow SNVDETECT {
         GATK4_CREATESEQUENCEDICTIONARY.out.dict
     )
     | set { merged }
-    merged.snp_vcf.view()
-    // Train Calibrate table with filtered snv db
 
-    // Apply trained calibration model
+    // wrangle data
+    // vcf
+    merged.snp_vcf
+    | map { meta, vcf -> [[id: 'vcf_db'], vcf]}
+    | concat (
+        merged.indel_vcf.map({ meta, vcf -> [[id: 'vcf_db'], vcf]})
+    )
+    | groupTuple
+    | set { ch_vcf_db }
+    // tbi
+    merged.snp_tbi
+    | map { meta, tbi -> [[id: 'vcf_db'], tbi]}
+    | concat (
+        merged.indel_tbi.map({ meta, tbi -> [[id: 'vcf_db'], tbi]})
+    )
+    | groupTuple
+    | set { ch_vcf_db_tbi }
 
+    // basecall quality score calibration process /w bootstraped snp_db
+    bqsr_run(
+        MARKDUPLICATE.out.bam,
+        MARKDUPLICATE.out.bai,
+        ref_ch,
+        SAMTOOLS_FAIDX.out.fai,
+        GATK4_CREATESEQUENCEDICTIONARY.out.dict,
+        ch_vcf_db,
+        ch_vcf_db_tbi
+    )
+    | set { ch_bqsr_bam }
+
+    post_calibration_call(
+        ch_bqsr_bam.calibrated,
+        MARKDUPLICATE.out.bai,
+        ref_ch,
+        SAMTOOLS_FAIDX.out.fai,
+        GATK4_CREATESEQUENCEDICTIONARY.out.dict
+    )
+    | set { ch_unfiltered_genotype }
+    ch_unfiltered_genotype.vcf.view()
 
     // HaplotypeCaller with calibrated bam
 
@@ -282,7 +321,6 @@ workflow SNVDETECT {
 
     // combine vcf files
 
-    // Call Genotype
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
